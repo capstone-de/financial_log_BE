@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Income, Expense, Withwhom
+from .models import Income, Expense, WithWhom
 
 # Register your models here.
 admin.site.register(Income)
 admin.site.register(Expense)
-admin.site.register(Withwhom)
+admin.site.register(WithWhom)

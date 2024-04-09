@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import include
+
+app_name = 'financial_log'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('wallet_app/', include('wallet_app.urls')),
 ]
