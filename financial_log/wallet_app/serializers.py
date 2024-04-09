@@ -16,3 +16,8 @@ class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
         fields = ('user', 'date', 'price', 'category', 'bname', 'with_whom', 'satisfaction')
+
+class DiaryExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Expense
+        fields = ('category', 'bname', 'price')

@@ -5,9 +5,9 @@ from user_app.models import User
 class Diary(models.Model):
     diary_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField()
+    date = models.DateField()
     contents = models.CharField(max_length=500)
-    privacy = models.IntegerField(db_comment='1 == public\n0 == private\n')
+    privacy = models.BooleanField(db_comment='1 == public\n0 == private\n')
 
     class Meta:
         managed = False
@@ -34,7 +34,7 @@ class Hashtag(models.Model):
 
 
 class DiaryHashtag(models.Model):
-    table_id = models.IntegerField(primary_key=True)
+    table_id = models.AutoField(primary_key=True)
     diary = models.ForeignKey(Diary, on_delete=models.CASCADE)
     hashtag = models.ForeignKey(Hashtag, on_delete=models.CASCADE)
 
