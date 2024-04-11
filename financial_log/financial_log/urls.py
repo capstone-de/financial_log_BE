@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 app_name = 'financial_log'
 
 urlpatterns = [
@@ -25,4 +28,4 @@ urlpatterns = [
     path('wallet_app/', include('wallet_app.urls')),
     path('diary_app/', include('diary_app.urls')),
     path('calendar_app/', include('calendar_app.urls')),
-]
+] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

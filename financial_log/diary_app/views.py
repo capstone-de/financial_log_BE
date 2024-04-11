@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Diary, Image, Hashtag, DiaryHashtag
 from wallet_app.models import Expense
-from user_app.models import User
+from user_app.models import User, Follow
 from .serializers import DiarySerializer, MyDiarySerializer
 from wallet_app.serializers import DiaryExpenseSerializer
 
@@ -24,9 +24,16 @@ def diaryList(request) :
 def myDiaryList(request) : 
     if request.method == 'GET' : 
         user = request.GET.get('user')
+        follower = Follow.objects.filter(follower=User.objects.get(user_id = user), status = 1).count()
+        following = Follow.objects.filter(following=User.objects.get(user_id = user), status = 1).count()
         myDiaryList = Diary.objects.filter(user_id = User.objects.get(user_id = user)).order_by('diary_id')[:10]
         serializer = MyDiarySerializer(myDiaryList, many=True)
-        return Response(serializer.data)
+        data = {
+            "follower" : follower,
+            "following" : following,
+            "myDiaryList" : serializer.data
+        }
+        return Response(data)
     return JsonResponse({"message" : "fail"}, status = 403)
 
 @csrf_exempt
@@ -45,6 +52,7 @@ def saveDiary(request) :
         if serializer.is_valid() :
             data = serializer.data
             hashtag_data = request.data.get('hashtag', [])
+            image_data = request.data.get('file', [])
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
             diary.save()
             for item in hashtag_data :
