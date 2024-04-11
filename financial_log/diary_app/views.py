@@ -17,7 +17,6 @@ def diaryList(request) :
         diaryList = Diary.objects.filter(privacy = 1).order_by('diary_id')[:10]
         serializer = DiarySerializer(diaryList, many=True)
         return Response(serializer.data)
-        return JsonResponse({"diaryList" : diaryList}, status = 200)
     return JsonResponse({"message" : "fail"}, status = 403)
 
 @csrf_exempt
