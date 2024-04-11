@@ -6,67 +6,88 @@ from rest_framework.response import Response
 from .models import Diary, Image, Hashtag, DiaryHashtag
 from wallet_app.models import Expense
 from user_app.models import User, Follow
-from .serializers import DiarySerializer, MyDiarySerializer
+from .serializers import DiarySerializer
 from wallet_app.serializers import DiaryExpenseSerializer
 
 # Create your views here.
 @csrf_exempt
 @api_view(['GET'])
-def diaryList(request) :
+def diaryList(request):
     if request.method == 'GET' : 
-        diaryList = Diary.objects.filter(privacy = 1).order_by('diary_id')[:10]
-        serializer = DiarySerializer(diaryList, many=True)
-        return Response(serializer.data)
+        diaryList = Diary.objects.filter(privacy = 1).order_by('date')[:10]
+        diaryListResult = []
+        for diary in diaryList:
+            hashtagList = DiaryHashtag.objects.filter(diary = diary.diary_id)
+            return_hashtag = []
+            for hashtagItem in hashtagList:
+                hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
+                return_hashtag.append(hashtag)
+            diaryData = {
+                'nickname': User.objects.get(user_id = diary.user.user_id).nickname,
+                'date': diary.date,
+                'contents': diary.contents,
+                'hashtag': return_hashtag
+            }
+            diaryListResult.append(diaryData)
+        return Response(diaryListResult)
     return JsonResponse({"message" : "fail"}, status = 403)
 
 @csrf_exempt
 @api_view(['GET'])
-def myDiaryList(request) : 
-    if request.method == 'GET' : 
-        user = request.GET.get('user')
-        follower = Follow.objects.filter(follower=User.objects.get(user_id = user), status = 1).count()
-        following = Follow.objects.filter(following=User.objects.get(user_id = user), status = 1).count()
-        myDiaryList = Diary.objects.filter(user_id = User.objects.get(user_id = user)).order_by('diary_id')[:10]
-        serializer = MyDiarySerializer(myDiaryList, many=True)
-        data = {
-            "follower" : follower,
-            "following" : following,
-            "myDiaryList" : serializer.data
+def myDiaryList(request): 
+    user = request.GET.get('user')
+    nickname = User.objects.get(user_id = user).nickname
+    follower = Follow.objects.filter(follower=User.objects.get(user_id = user), status = 1).count()
+    following = Follow.objects.filter(following=User.objects.get(user_id = user), status = 1).count()
+
+    myDiaryList = Diary.objects.filter(user_id = User.objects.get(user_id = user)).order_by('diary_id')[:10]
+    myDiaryListResult = []
+    for myDiary in myDiaryList:
+        hashtagList = DiaryHashtag.objects.filter(diary = myDiary.diary_id)
+        return_hashtag = []
+        for hashtagItem in hashtagList:
+            hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
+            return_hashtag.append(hashtag)
+        diary_data = {
+            'date': myDiary.date,
+            'contents': myDiary.contents,
+            'hashtag': return_hashtag
         }
-        return Response(data)
-    return JsonResponse({"message" : "fail"}, status = 403)
+        myDiaryListResult.append(diary_data)
+
+    myDiaryListData = {
+        "nickname" : nickname,
+        "follower" : follower,
+        "following" : following,
+        "myDiaryList" : myDiaryListResult
+    }
+    return Response(myDiaryListData)
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
-def saveDiary(request) :
+def saveDiary(request):
     if request.method == 'GET' : 
         user = request.GET.get('user')
         date = request.GET.get('date')
         if Diary.objects.filter(user=User.objects.get(user_id = user), date = date) :
-            return JsonResponse({"message" : "이미 일기를 작성했습니다."}, status=400)
+            return JsonResponse({"message" : "이미 일기를 작성했습니다."}, status=403)
         expenses = Expense.objects.filter(user=User.objects.get(user_id = user), date=date)
-        serializer = DiaryExpenseSerializer(expenses, many=True)
-        return Response(serializer.data)
+        diaryExpenseSerializer = DiaryExpenseSerializer(expenses, many=True)
+        return Response(diaryExpenseSerializer.data)
     if request.method == 'POST' : 
-        serializer = DiarySerializer(data = request.data)
-        if serializer.is_valid() :
-            data = serializer.data
-            hashtag_data = request.data.get('hashtag', [])
-            image_data = request.data.get('file', [])
+        diarySerializer = DiarySerializer(data = request.data)
+        if diarySerializer.is_valid() :
+            data = diarySerializer.data
+            hashtagList = request.data.get('hashtag', [])
+            # image_data = request.data.get('file', [])
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
             diary.save()
-            for item in hashtag_data :
-                if not Hashtag.objects.filter(hashtag=item):
-                    hashtag = Hashtag(hashtag = item)
+            for hashtagListItem in hashtagList :
+                if not Hashtag.objects.filter(hashtag=hashtagListItem):
+                    hashtag = Hashtag(hashtag = hashtagListItem)
                     hashtag.save()
-                diaryHashtag = DiaryHashtag(diary = diary, hashtag = Hashtag.objects.get(hashtag=item))
+                diaryHashtag = DiaryHashtag(diary = diary, hashtag = Hashtag.objects.get(hashtag=hashtagListItem))
                 diaryHashtag.save()
             return JsonResponse({"message" : "success"}, status=200)
         else :
-            return JsonResponse({"message" : "fail"}, status=400)
-
-                
-                
-            
-    
-    
+            return JsonResponse({"error" : diarySerializer.errors()}, status=403)

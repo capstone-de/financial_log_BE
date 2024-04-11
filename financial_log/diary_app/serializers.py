@@ -11,9 +11,3 @@ class DiarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Diary
         fields = ('user', 'date', 'contents', 'hashtag', 'privacy')
-
-class MyDiarySerializer(serializers.ModelSerializer):
-    hashtag = HashtagSerializer(many=True, read_only=True)
-    class Meta:
-        model = Diary
-        fields = ('user', 'date', 'contents', 'hashtag', 'privacy')
