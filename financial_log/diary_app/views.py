@@ -21,7 +21,7 @@ def diaryList(request):
         for follower in followList:
             followerList.append(User.objects.get(user_id = follower.follower.user_id).user_id)
 
-        diaryList = Diary.objects.filter(privacy = 1, user__in=followerList).order_by('date')[:10]
+        diaryList = Diary.objects.filter(privacy = 1, user__in=followerList).order_by('-date')[:10]
         diaryListResult = []
         for diary in diaryList:
             hashtagList = DiaryHashtag.objects.filter(diary = diary.diary_id)
@@ -47,7 +47,7 @@ def myDiaryList(request):
     follower = Follow.objects.filter(follower=user, status = 1).count()
     following = Follow.objects.filter(following=user, status = 1).count()
 
-    myDiaryList = Diary.objects.filter(user_id = user).order_by('diary_id')[:10]
+    myDiaryList = Diary.objects.filter(user_id = user).order_by('-date')[:10]
     myDiaryListResult = []
     for myDiary in myDiaryList:
         hashtagList = DiaryHashtag.objects.filter(diary = myDiary.diary_id)
