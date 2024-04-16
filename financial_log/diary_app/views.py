@@ -14,7 +14,14 @@ from wallet_app.serializers import DiaryExpenseSerializer
 @api_view(['GET'])
 def diaryList(request):
     if request.method == 'GET' : 
-        diaryList = Diary.objects.filter(privacy = 1).order_by('date')[:10]
+        user = request.GET.get('user')
+
+        followList = Follow.objects.filter(following=user, status = 1)
+        followerList = []
+        for follower in followList:
+            followerList.append(User.objects.get(user_id = follower.follower.user_id).user_id)
+
+        diaryList = Diary.objects.filter(privacy = 1, user__in=followerList).order_by('date')[:10]
         diaryListResult = []
         for diary in diaryList:
             hashtagList = DiaryHashtag.objects.filter(diary = diary.diary_id)
@@ -37,10 +44,10 @@ def diaryList(request):
 def myDiaryList(request): 
     user = request.GET.get('user')
     nickname = User.objects.get(user_id = user).nickname
-    follower = Follow.objects.filter(follower=User.objects.get(user_id = user), status = 1).count()
-    following = Follow.objects.filter(following=User.objects.get(user_id = user), status = 1).count()
+    follower = Follow.objects.filter(follower=user, status = 1).count()
+    following = Follow.objects.filter(following=user, status = 1).count()
 
-    myDiaryList = Diary.objects.filter(user_id = User.objects.get(user_id = user)).order_by('diary_id')[:10]
+    myDiaryList = Diary.objects.filter(user_id = user).order_by('diary_id')[:10]
     myDiaryListResult = []
     for myDiary in myDiaryList:
         hashtagList = DiaryHashtag.objects.filter(diary = myDiary.diary_id)
@@ -79,7 +86,7 @@ def saveDiary(request):
         if diarySerializer.is_valid() :
             data = diarySerializer.data
             hashtagList = request.data.get('hashtag', [])
-            # image_data = request.data.get('file', [])
+            # image_data = request.FILE('file', [])
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
             diary.save()
             for hashtagListItem in hashtagList :
