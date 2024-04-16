@@ -8,6 +8,7 @@ from wallet_app.models import Expense
 from user_app.models import User, Follow
 from .serializers import DiarySerializer, ImageSerializer
 from wallet_app.serializers import DiaryExpenseSerializer
+from django.conf import settings
 
 # Create your views here.
 @csrf_exempt
@@ -25,15 +26,21 @@ def diaryList(request):
         diaryListResult = []
         for diary in diaryList:
             hashtagList = DiaryHashtag.objects.filter(diary = diary.diary_id)
+            imageList = Image.objects.filter(diary = diary.diary_id)
             return_hashtag = []
+            return_images = []
             for hashtagItem in hashtagList:
                 hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
                 return_hashtag.append(hashtag)
+            for imageItem in imageList:
+                image_url = settings.MEDIA_URL + str(imageItem.image)
+                return_images.append(image_url)
             diaryData = {
                 'nickname': User.objects.get(user_id = diary.user.user_id).nickname,
                 'date': diary.date,
                 'contents': diary.contents,
-                'hashtag': return_hashtag
+                'hashtag': return_hashtag,
+                'image' : return_images
             }
             diaryListResult.append(diaryData)
         return Response(diaryListResult)
@@ -53,13 +60,18 @@ def myDiaryList(request):
         hashtagList = DiaryHashtag.objects.filter(diary = myDiary.diary_id)
         imageList = Image.objects.filter(diary = myDiary.diary_id)
         return_hashtag = []
+        return_images = []
         for hashtagItem in hashtagList:
             hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
             return_hashtag.append(hashtag)
+        for imageItem in imageList:
+            image_url = settings.MEDIA_URL + str(imageItem.image)
+            return_images.append(image_url)
         diary_data = {
             'date': myDiary.date,
             'contents': myDiary.contents,
             'hashtag': return_hashtag,
+            'image' : return_images
         }
         myDiaryListResult.append(diary_data)
 
