@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .models import Diary, Image, Hashtag, DiaryHashtag
 from wallet_app.models import Expense
 from user_app.models import User, Follow
-from .serializers import DiarySerializer
+from .serializers import DiarySerializer, ImageSerializer
 from wallet_app.serializers import DiaryExpenseSerializer
 
 # Create your views here.
@@ -51,6 +51,7 @@ def myDiaryList(request):
     myDiaryListResult = []
     for myDiary in myDiaryList:
         hashtagList = DiaryHashtag.objects.filter(diary = myDiary.diary_id)
+        imageList = Image.objects.filter(diary = myDiary.diary_id)
         return_hashtag = []
         for hashtagItem in hashtagList:
             hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
@@ -58,7 +59,7 @@ def myDiaryList(request):
         diary_data = {
             'date': myDiary.date,
             'contents': myDiary.contents,
-            'hashtag': return_hashtag
+            'hashtag': return_hashtag,
         }
         myDiaryListResult.append(diary_data)
 
@@ -81,14 +82,19 @@ def saveDiary(request):
         expenses = Expense.objects.filter(user=User.objects.get(user_id = user), date=date)
         diaryExpenseSerializer = DiaryExpenseSerializer(expenses, many=True)
         return Response(diaryExpenseSerializer.data)
+    
     if request.method == 'POST' : 
         diarySerializer = DiarySerializer(data = request.data)
+        imageList = request.FILES.getlist('image')
+        print(imageList)
         if diarySerializer.is_valid() :
             data = diarySerializer.data
             hashtagList = request.data.get('hashtag', [])
-            # image_data = request.FILE('file', [])
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
             diary.save()
+            for imageListItem in imageList :
+                image = Image(diary = diary, image = imageListItem)
+                image.save()
             for hashtagListItem in hashtagList :
                 if not Hashtag.objects.filter(hashtag=hashtagListItem):
                     hashtag = Hashtag(hashtag = hashtagListItem)
@@ -97,4 +103,4 @@ def saveDiary(request):
                 diaryHashtag.save()
             return JsonResponse({"message" : "success"}, status=200)
         else :
-            return JsonResponse({"error" : diarySerializer.errors()}, status=403)
+            return JsonResponse({"error": diarySerializer.errors}, status=403)

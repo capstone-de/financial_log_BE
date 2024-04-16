@@ -16,7 +16,7 @@ class Diary(models.Model):
 
 class Image(models.Model):
     image_id = models.IntegerField(primary_key=True)
-    file = models.TextField()
+    image = models.ImageField()
     diary = models.ForeignKey(Diary, on_delete=models.CASCADE)
 
     class Meta:
