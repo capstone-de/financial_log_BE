@@ -1,6 +1,7 @@
 from django.db import models
 
 from user_app.models import User
+from user_app.models import Follow
 
 class Income(models.Model):
     income_id = models.AutoField(primary_key=True)

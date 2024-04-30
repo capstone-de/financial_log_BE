@@ -28,5 +28,6 @@ urlpatterns = [
     path('wallet_app/', include('wallet_app.urls')),
     path('diary_app/', include('diary_app.urls')),
     path('calendar_app/', include('calendar_app.urls')),
+    path('statistics_app/', include('statistics_app.urls'))
 ] 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
