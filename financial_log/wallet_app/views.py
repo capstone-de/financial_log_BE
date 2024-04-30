@@ -10,16 +10,16 @@ from .serializers import IncomeSerializer, ExpenseSerializer, WithWhomSerializer
 # Create your views here.
 @csrf_exempt
 @api_view(['POST'])
-def saveIncome(request) : 
+def saveIncome(request) :
     serializer = IncomeSerializer(data=request.data)
     if serializer.is_valid() :
         serializer.save()
         return JsonResponse({"message" : "success"}, status=200)
     else :
-        return JsonResponse({"error" : serializer.errors()}, status=400)
+        return JsonResponse({"error" : serializer.errors}, status=400)
 
 @api_view(['POST'])
-def saveExpense(request) : 
+def saveExpense(request) :
     expenseSerializer = ExpenseSerializer(data=request.data)
     if expenseSerializer.is_valid() :
         inputExpense = expenseSerializer.data

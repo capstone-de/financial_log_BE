@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'calendar_app',
     'wallet_app',
     'diary_app',
-    'user_app'
+    'user_app',
+    'statistics_app'
 ]
 
 MIDDLEWARE = [
