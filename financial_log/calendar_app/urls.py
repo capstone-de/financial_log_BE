@@ -4,6 +4,7 @@ from . import views
 app_name = 'calendar_app'
 
 urlpatterns = [
-    path('getWallet', views.getWallet),
+    path('getWalletIncome', views.getWalletIncome),
+    path('getWalletExpense', views.getWalletExpense),
     path('getCalendar', views.getCalendar),
 ]

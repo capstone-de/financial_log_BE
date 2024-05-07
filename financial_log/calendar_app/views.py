@@ -8,7 +8,22 @@ from .serializers import DiaryCalendarSerializer, ExpenseCalendarSerializer, Inc
 
 # Create your views here.
 @api_view(['GET'])
-def getWallet(request):
+def getWalletIncome(request):
+    user = request.GET.get('user')
+    date = request.GET.get('date')
+    try:
+        user_id = User.objects.get(user_id=user)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    incomes = Income.objects.filter(user = User.objects.get(user_id = user), date = date)
+    incomeSerializer = IncomeSerializer(incomes, many=True)
+    walletData = {
+        "income": incomeSerializer.data
+    }
+    return Response(walletData)
+
+@api_view(['GET'])
+def getWalletExpense(request):
     user = request.GET.get('user')
     date = request.GET.get('date')
     try:
@@ -16,13 +31,11 @@ def getWallet(request):
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=404)
     expenses = Expense.objects.filter(user = User.objects.get(user_id = user), date = date)
-    incomes = Income.objects.filter(user = User.objects.get(user_id = user), date = date)
     expenseSerializer = ExpenseSerializer(expenses, many=True)
-    incomeSerializer = IncomeSerializer(incomes, many=True)
     walletData = {
         "expense": expenseSerializer.data,
-        "income": incomeSerializer.data
     }
+    print(walletData)
     return Response(walletData)
 
 @api_view(['GET'])
@@ -48,4 +61,5 @@ def getCalendar(request):
         "expense" : expense_list,
         "income" : income_list
     }
+    print(getCalendarData)
     return Response(getCalendarData)
