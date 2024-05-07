@@ -6,7 +6,25 @@ from .models import User, Expense, Income, Diary
 from .serializers import ExpenseSerializer, IncomeSerializer
 from .serializers import DiaryCalendarSerializer, ExpenseCalendarSerializer, IncomeCalendarSerializer
 
-# Create your views here.
+# @api_view(['GET'])
+# def getWallet(request):
+#     user = request.GET.get('user')
+#     date = request.GET.get('date')
+#     try:
+#         user_id = User.objects.get(user_id=user)
+#     except User.DoesNotExist:
+#         return Response({"error": "User not found"}, status=404)
+#     incomes = Income.objects.filter(user = User.objects.get(user_id = user), date = date)
+#     incomeSerializer = IncomeSerializer(incomes, many=True)
+#     expenses = Expense.objects.filter(user = User.objects.get(user_id = user), date = date)
+#     expenseSerializer = ExpenseSerializer(expenses, many=True)
+#     walletData = {
+#         "income": incomeSerializer.data,
+#         "expense": expenseSerializer.data
+#     }
+#     print(walletData)
+#     return Response(walletData)
+
 @api_view(['GET'])
 def getWalletIncome(request):
     user = request.GET.get('user')
@@ -33,7 +51,7 @@ def getWalletExpense(request):
     expenses = Expense.objects.filter(user = User.objects.get(user_id = user), date = date)
     expenseSerializer = ExpenseSerializer(expenses, many=True)
     walletData = {
-        "expense": expenseSerializer.data,
+        "expense": expenseSerializer.data
     }
     print(walletData)
     return Response(walletData)
