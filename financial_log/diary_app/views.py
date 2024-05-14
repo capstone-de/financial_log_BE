@@ -92,9 +92,9 @@ def saveDiary(request):
     if request.method == 'GET' : 
         user = request.GET.get('user')
         date = request.GET.get('date')
-        if Diary.objects.filter(user=User.objects.get(user_id = user), date = date) :
+        if Diary.objects.filter(user=user, date = date) :
             return JsonResponse({"message" : "이미 일기를 작성했습니다."}, status=403)
-        expenses = Expense.objects.filter(user=User.objects.get(user_id = user), date=date)
+        expenses = Expense.objects.filter(user=user, date=date)
         diaryExpenseSerializer = DiaryExpenseSerializer(expenses, many=True)
         return Response(diaryExpenseSerializer.data)
     
