@@ -96,11 +96,13 @@ def saveDiary(request):
             return JsonResponse({"message" : "이미 일기를 작성했습니다."}, status=403)
         expenses = Expense.objects.filter(user=user, date=date)
         diaryExpenseSerializer = DiaryExpenseSerializer(expenses, many=True)
+        print(diaryExpenseSerializer.data)
         return Response(diaryExpenseSerializer.data)
     
     if request.method == 'POST' : 
         diarySerializer = DiarySerializer(data = request.data)
         imageList = request.FILES.getlist('image')
+        print(request.data)
         print(imageList)
         if diarySerializer.is_valid() :
             data = diarySerializer.data

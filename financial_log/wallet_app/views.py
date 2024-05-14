@@ -35,10 +35,6 @@ def saveExpense(request) :
         if expenseSerializer.is_valid() :
             inputExpense = expenseSerializer.data
             withwhomList = request.data.get('with_whom', [])
-            # for withwhomItem in withwhomList :
-            #     print(withwhomItem)
-            #     nickname = User.objects.get(nickname=nickname)
-    
             expense = Expense(user=User.objects.get(user_id = inputExpense['user']), date=inputExpense['date'], price=inputExpense['price'], category=inputExpense['category'], bname=inputExpense['bname'], satisfaction=inputExpense['satisfaction'])
             expense.save()
             for withwhomItem in withwhomList :
