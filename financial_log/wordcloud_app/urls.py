@@ -5,5 +5,5 @@ app_name = 'wordcloud_app'
 
 urlpatterns = [
     path('myDiary', views.myDiary),
-    # path('diary', views.diary),
+    path('diary', views.diary),
 ]
