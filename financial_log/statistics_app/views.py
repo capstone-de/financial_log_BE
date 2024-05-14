@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from user_app.models import User
 from wallet_app.models import Income, Expense
-from .serializers import *
+from diary_app.models import Diary, Hashtag, DiaryHashtag
 
 from django.db.models import Sum, Avg
 from datetime import datetime, timedelta

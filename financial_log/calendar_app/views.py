@@ -38,6 +38,7 @@ def getWalletIncome(request):
     walletData = {
         "income": incomeSerializer.data
     }
+    print(walletData)
     return Response(walletData)
 
 @api_view(['GET'])
