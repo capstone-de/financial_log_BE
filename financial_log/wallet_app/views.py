@@ -25,20 +25,21 @@ def saveExpense(request) :
         following_id= Follow.objects.filter(follower = user, status = 1).values_list('following', flat=True)
         following_nickname = []
         for f_id in following_id:
-            print(f_id)
             nickname = User.objects.get(user_id = f_id).nickname
             following_nickname.append(nickname)
         return Response(following_nickname)
     if request.method == 'POST':
-        print(request.data)
         expenseSerializer = ExpenseSerializer(data=request.data)
         if expenseSerializer.is_valid() :
             inputExpense = expenseSerializer.data
             withwhomList = request.data.get('with_whom', [])
+            print(withwhomList)
             expense = Expense(user=User.objects.get(user_id = inputExpense['user']), date=inputExpense['date'], price=inputExpense['price'], category=inputExpense['category'], bname=inputExpense['bname'], satisfaction=inputExpense['satisfaction'])
             expense.save()
             for withwhomItem in withwhomList :
-                user_id = User.objects.get(nickname = withwhomItem).user_id
+                withwhom = withwhomItem.get('nickname')
+                print(withwhom)
+                user_id = User.objects.get(nickname=withwhom).user_id
                 withwhom = WithWhom(expense=expense, user=User.objects.get(user_id = user_id))
                 withwhom.save()
             return JsonResponse({"message" : "success"}, status=200)

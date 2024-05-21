@@ -24,7 +24,6 @@ def diaryList(request):
         followerList = []
         for follower in followList:
             followerList.append(User.objects.get(user_id = follower.follower.user_id).user_id)
-
         diaryList = Diary.objects.filter(privacy = 1, user__in=followerList).order_by('-date')[:10]
         diaryListResult = []
         for diary in diaryList:
@@ -93,6 +92,7 @@ def saveDiary(request):
         user = request.GET.get('user')
         date = request.GET.get('date')
         if Diary.objects.filter(user=user, date = date) :
+            print("일기 이미 작성함")
             return JsonResponse({"message" : "이미 일기를 작성했습니다."}, status=403)
         expenses = Expense.objects.filter(user=user, date=date)
         diaryExpenseSerializer = DiaryExpenseSerializer(expenses, many=True)

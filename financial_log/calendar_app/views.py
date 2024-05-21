@@ -38,7 +38,6 @@ def getWalletIncome(request):
     walletData = {
         "income": incomeSerializer.data
     }
-    print(walletData)
     return Response(walletData)
 
 @api_view(['GET'])
@@ -54,7 +53,6 @@ def getWalletExpense(request):
     walletData = {
         "expense": expenseSerializer.data
     }
-    print(walletData)
     return Response(walletData)
 
 @api_view(['GET'])
@@ -80,5 +78,4 @@ def getCalendar(request):
         "expense" : expense_list,
         "income" : income_list
     }
-    print(getCalendarData)
     return Response(getCalendarData)
