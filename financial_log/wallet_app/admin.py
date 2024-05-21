@@ -2,6 +2,16 @@ from django.contrib import admin
 from .models import Income, Expense, WithWhom
 
 # Register your models here.
-admin.site.register(Income)
-admin.site.register(Expense)
-admin.site.register(WithWhom)
+
+class ImcomeAdmin(admin.ModelAdmin):
+    list_display = ['income_id', 'user', 'date', 'price', 'category', 'memo']
+
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ['expense_id', 'user', 'date', 'price', 'category', 'bname', 'satisfaction']
+
+class withWhomAdmin(admin.ModelAdmin):
+    list_display = ['table_id', 'expense', 'user']
+
+admin.site.register(Income, ImcomeAdmin)
+admin.site.register(Expense, ExpenseAdmin)
+admin.site.register(WithWhom, withWhomAdmin)

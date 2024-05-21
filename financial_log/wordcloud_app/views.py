@@ -36,9 +36,10 @@ def myDiary(request):
         temp_list = Hashtag.objects.filter(hashtag_id = hashtag_id).values_list('hashtag', flat = True)
         myWord_list.extend(temp_list)
     # myWord_list = Hashtag.objects.filter(diaryhashtag__diary__user=user).values_list('hashtag', flat=True)
+    if myWord_list == [] :
+        return JsonResponse({"message" : "no hashtag"}, status = 400)
 
     word_count = Counter(myWord_list)
-
     wordcloud = WordCloud(width=300, height=300, 
                       background_color='white', 
                       color_func=color_func1,
