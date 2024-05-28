@@ -28,6 +28,7 @@ SECRET_KEY = 'django-insecure-e#0%015)==l)h5=e@vnd9wqj$n9mcu5^z8_fu5!hae)2u9q&wf
 DEBUG = True
 
 ALLOWED_HOSTS = ['54.79.124.50']
+# ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -44,7 +45,8 @@ INSTALLED_APPS = [
     'wallet_app',
     'diary_app',
     'user_app',
-    'statistics_app'
+    'statistics_app',
+    'wordcloud_app'
 ]
 
 MIDDLEWARE = [
