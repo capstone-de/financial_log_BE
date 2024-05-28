@@ -86,10 +86,10 @@ WSGI_APPLICATION = 'financial_log.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FINANCIAL_LOG',
-        'USER': 'financial_log',
+        'NAME': 'financial-log',
+        'USER': 'admin',
         'PASSWORD': 'financial_log1234',
-        'HOST': 'localhost',
+        'HOST': 'financial-log.cx46y6yi0pz2.ap-southeast-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
