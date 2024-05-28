@@ -12,6 +12,7 @@ from .serializers import DiarySerializer, ImageSerializer
 from wallet_app.serializers import DiaryExpenseSerializer
 
 from django.conf import settings
+import base64
 
 # Create your views here.
 @csrf_exempt
@@ -35,8 +36,14 @@ def diaryList(request):
                 hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
                 return_hashtag.append(hashtag)
             for imageItem in imageList:
-                image_url = settings.MEDIA_URL + str(imageItem.image)
-                return_images.append(image_url)
+                image_path = '_media/' + imageItem.image.decode('utf-8')
+                try:
+                    with open(image_path, 'rb') as image_file:
+                        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+                        # Base64 인코딩된 이미지 데이터를 리스트에 추가
+                        return_images.append(encoded_image)
+                except Exception as e:
+                    print(f"Error encoding image: {e}")
             diaryData = {
                 'nickname': User.objects.get(user_id = diary.user.user_id).nickname,
                 'date': diary.date,
@@ -67,8 +74,14 @@ def myDiaryList(request):
             hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
             return_hashtag.append(hashtag)
         for imageItem in imageList:
-            image_url = settings.MEDIA_URL + str(imageItem.image)
-            return_images.append(image_url)
+                image_path = '_media/' + imageItem.image.decode('utf-8')
+                try:
+                    with open(image_path, 'rb') as image_file:
+                        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+                        # Base64 인코딩된 이미지 데이터를 리스트에 추가
+                        return_images.append(encoded_image)
+                except Exception as e:
+                    print(f"Error encoding image: {e}")
         diary_data = {
             'date': myDiary.date,
             'contents': myDiary.contents,

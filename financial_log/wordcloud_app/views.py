@@ -13,12 +13,12 @@ import matplotlib.pyplot as plt
 
 colors1 = cycle(["#4c8df7", "#e49995", "#fbe64d"])
 colors2 = cycle(["#c6dcfc", "#f7e0df", "#fef8ba"])
-
+#파랑  노랑
 def color_func1(word, font_size, position, orientation, random_state=None, **kwargs):
     return next(colors1)
 
 def color_func2(word, font_size, position, orientation, random_state=None, **kwargs):
-    return next(colors2)
+    return next(colors1)
 
 # Create your views here.
 @csrf_exempt
@@ -48,7 +48,7 @@ def myDiary(request):
     image_path = "./wordcloud_app/media/myDiary.png"
     wordcloud.to_file(image_path)
     response = FileResponse(open(image_path, 'rb'), content_type='image/png')
-    
+    print(response)
     return response
 
 @csrf_exempt
@@ -74,5 +74,5 @@ def diary(request):
     image_path = "./wordcloud_app/media/diary.png"
     wordcloud.to_file(image_path)
     response = FileResponse(open(image_path, 'rb'), content_type='image/png')
-    
     return response
+

@@ -7,7 +7,6 @@ from .models import Income, Expense, WithWhom
 from user_app.models import User, Follow
 from .serializers import IncomeSerializer, ExpenseSerializer, WithWhomSerializer
 
-# Create your views here.
 @csrf_exempt
 @api_view(['POST'])
 def saveIncome(request) :
@@ -29,19 +28,18 @@ def saveExpense(request) :
             following_nickname.append(nickname)
         return Response(following_nickname)
     if request.method == 'POST':
+        print(request.data)
         expenseSerializer = ExpenseSerializer(data=request.data)
         if expenseSerializer.is_valid() :
             inputExpense = expenseSerializer.data
             withwhomList = request.data.get('with_whom', [])
-            print(withwhomList)
             expense = Expense(user=User.objects.get(user_id = inputExpense['user']), date=inputExpense['date'], price=inputExpense['price'], category=inputExpense['category'], bname=inputExpense['bname'], satisfaction=inputExpense['satisfaction'])
             expense.save()
             for withwhomItem in withwhomList :
                 withwhom = withwhomItem.get('nickname')
-                print(withwhom)
                 user_id = User.objects.get(nickname=withwhom).user_id
                 withwhom = WithWhom(expense=expense, user=User.objects.get(user_id = user_id))
                 withwhom.save()
             return JsonResponse({"message" : "success"}, status=200)
         else :
-            return JsonResponse({"error" : serializer.errors}, status=403)
+            return JsonResponse({"error" : serializers.errors}, status=403)
