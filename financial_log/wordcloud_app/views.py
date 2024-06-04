@@ -11,9 +11,17 @@ from collections import Counter
 from itertools import cycle
 import matplotlib.pyplot as plt
 
+from pathlib import Path
+
 colors1 = cycle(["#4c8df7", "#e49995", "#fbe64d"])
 colors2 = cycle(["#c6dcfc", "#f7e0df", "#fef8ba"])
-#파랑  노랑
+
+# 현재 파일의 디렉토리 경로
+BASE_DIR = Path(__file__).resolve().parent
+
+# 상대 경로 설정
+font_path = BASE_DIR / "font.ttf"
+
 def color_func1(word, font_size, position, orientation, random_state=None, **kwargs):
     return next(colors1)
 
@@ -38,11 +46,12 @@ def myDiary(request):
     # myWord_list = Hashtag.objects.filter(diaryhashtag__diary__user=user).values_list('hashtag', flat=True)
     if myWord_list == [] :
         return JsonResponse({"message" : "no hashtag"}, status = 400)
-
+    print(myWord_list)
     word_count = Counter(myWord_list)
     wordcloud = WordCloud(width=300, height=300, 
                       background_color='white', 
                       color_func=color_func1,
+                      font_path=str(font_path), 
                       min_font_size=10).generate_from_frequencies(word_count)
 
     image_path = "./wordcloud_app/media/myDiary.png"
