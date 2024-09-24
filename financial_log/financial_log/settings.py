@@ -27,9 +27,8 @@ SECRET_KEY = 'django-insecure-e#0%015)==l)h5=e@vnd9wqj$n9mcu5^z8_fu5!hae)2u9q&wf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['54.79.124.50']
-# ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['54.79.124.50']
 
 # Application definition
 
@@ -87,9 +86,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'financial-log',
-        'USER': 'admin',
-        'PASSWORD': 'financial_log1234',
-        'HOST': 'financial-log.cx46y6yi0pz2.ap-southeast-2.rds.amazonaws.com',
+        'USER': 'root',
+        'PASSWORD': 'financial_log',
+        'HOST': 'financial-log.cdwgywwuc934.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }

@@ -11,16 +11,19 @@ from collections import Counter
 from itertools import cycle
 import matplotlib.pyplot as plt
 
-from pathlib import Path
 
-colors1 = cycle(["#4c8df7", "#e49995", "#fbe64d"])
-colors2 = cycle(["#c6dcfc", "#f7e0df", "#fef8ba"])
+from pathlib import Path
 
 # 현재 파일의 디렉토리 경로
 BASE_DIR = Path(__file__).resolve().parent
 
 # 상대 경로 설정
 font_path = BASE_DIR / "font.ttf"
+
+colors1 = cycle(["#4c8df7", "#e49995", "#fbe64d"])
+colors2 = cycle(["#c6dcfc", "#f7e0df", "#fef8ba"])
+
+
 
 def color_func1(word, font_size, position, orientation, random_state=None, **kwargs):
     return next(colors1)
