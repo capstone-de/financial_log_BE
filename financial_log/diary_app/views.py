@@ -28,10 +28,8 @@ def upload_image_to_s3(image_file, user_id):
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             region_name=settings.AWS_S3_REGION_NAME
         )
-
         # 이미지 파일에 고유한 이름을 생성
         image_key = f"diary_images/{user_id}/{uuid4()}/{image_file.name}"
-
         # S3에 이미지 업로드
         s3.upload_fileobj(
             image_file,
@@ -39,7 +37,6 @@ def upload_image_to_s3(image_file, user_id):
             image_key,
             ExtraArgs={"ContentType": image_file.content_type}
         )
-
         # S3에 저장된 이미지의 URL 반환
         image_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{image_key}"
         return image_url
@@ -155,13 +152,18 @@ def saveDiary(request):
         print(imageList)
         if diarySerializer.is_valid() :
             data = diarySerializer.data
-            hashtagList = request.data.get('hashtag', [])
+            # 이미지 파일 유무에 따라 해시태그 가져오기
+            if imageList:
+                hashtagList = request.data.getlist('hashtag')  # 이미지가 있는 경우
+            else:
+                hashtagList = request.data.get('hashtag', [])  # 이미지가 없는 경우
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
             diary.save()
             for imageListItem in imageList :
                 # image = Image(diary = diary, image = imageListItem)
                 image_url = upload_image_to_s3(imageListItem, data['user'])
                 image = Image(diary=diary, image=image_url)  # S3 URL을 저장
+                print(image)
                 image.save()
             for hashtagListItem in hashtagList :
                 if not Hashtag.objects.filter(hashtag=hashtagListItem):
