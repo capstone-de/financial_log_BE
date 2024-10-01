@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-e#0%015)==l)h5=e@vnd9wqj$n9mcu5^z8_fu5!hae)2u9q&wf
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-#ALLOWED_HOSTS = ['54.79.124.50']
+# ALLOWED_HOSTS = ['54.79.124.50']
 
 # Application definition
 
@@ -40,8 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'storages',                     #django_storages
     'calendar_app',
-    'wallet_app',
+    'wallet_app', 
     'diary_app',
     'user_app',
     'statistics_app',
@@ -85,14 +86,22 @@ WSGI_APPLICATION = 'financial_log.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'financial-log',
+        'NAME': 'financial_log',
         'USER': 'root',
-        'PASSWORD': 'financial_log',
+        'PASSWORD': 'financial-log',
         'HOST': 'financial-log.cdwgywwuc934.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
 
+# S3 setting
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '[access_key]')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '[secret_key]')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'financial_log')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ap-northeast-2')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
