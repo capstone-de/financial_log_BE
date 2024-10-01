@@ -16,7 +16,7 @@ class Diary(models.Model):
 
 class Image(models.Model):
     image_id = models.IntegerField(primary_key=True)
-    image = models.ImageField()
+    image = models.CharField(max_length=500)  # S3 URL을 저장
     diary = models.ForeignKey(Diary, on_delete=models.CASCADE)
 
     class Meta:
