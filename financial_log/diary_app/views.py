@@ -21,27 +21,31 @@ from django.conf import settings
 
 # S3에 파일을 업로드
 def upload_image_to_s3(image_file, user_id):
-    s3 = boto3.client(
-        's3',
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_S3_REGION_NAME
-    )
+    try : 
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
 
-    # 이미지 파일에 고유한 이름을 생성
-    image_key = f"diary_images/{user_id}/{uuid4()}/{image_file.name}"
+        # 이미지 파일에 고유한 이름을 생성
+        image_key = f"diary_images/{user_id}/{uuid4()}/{image_file.name}"
 
-    # S3에 이미지 업로드
-    s3.upload_fileobj(
-        image_file,
-        settings.AWS_STORAGE_BUCKET_NAME,
-        image_key,
-        ExtraArgs={"ContentType": image_file.content_type}
-    )
+        # S3에 이미지 업로드
+        s3.upload_fileobj(
+            image_file,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            image_key,
+            ExtraArgs={"ContentType": image_file.content_type}
+        )
 
-    # S3에 저장된 이미지의 URL 반환
-    image_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{image_key}"
-    return image_url
+        # S3에 저장된 이미지의 URL 반환
+        image_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{image_key}"
+        return image_url
+    except Exception as e:
+        print(f"Error uploading to S3: {e}")
+        return None
 
 @csrf_exempt
 @api_view(['GET'])
