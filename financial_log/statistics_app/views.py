@@ -169,9 +169,9 @@ def sentimentAnalysis(request):
         if sentiment_result:
             score = 0  # 기본 점수는 0으로 설정
             if sentiment_result['label'] == 'POSITIVE':
-                score = sentiment_result['score']  # 긍정 점수를 그대로 사용
+                score = round(sentiment_result['score'],2) # 긍정 점수를 그대로 사용
             elif sentiment_result['label'] == 'NEGATIVE':
-                score = -sentiment_result['score']  # 부정 점수는 음수로 변환하여 사용
+                score = round(-sentiment_result['score'],2)  # 부정 점수는 음수로 변환하여 사용
             
             # 해당 일기의 날짜에 맞는 지출 금액 찾기
             expenditure = next((expense['price'] for expense in expenses if expense['date'] == diary['date']), 0)
@@ -190,7 +190,7 @@ def sentimentAnalysis(request):
 
     result = {
         'coordinate': coordinates,  # (감정분석수행 결과, 금액) 리스트
-        'correlation': correlation
+        'correlation': round(correlation,2)
     }
 
     return Response(result)
