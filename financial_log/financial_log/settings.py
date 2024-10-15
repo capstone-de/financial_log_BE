@@ -95,10 +95,10 @@ DATABASES = {
 }
 
 # S3 setting
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '[access_key]')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '[secret_key]')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'financial_log')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ap-northeast-2')
+AWS_ACCESS_KEY_ID = '[access_key]'
+AWS_SECRET_ACCESS_KEY = '[secret_key]'
+AWS_STORAGE_BUCKET_NAME = 'financial-log'
+AWS_S3_REGION_NAME = 'ap-northeast-2'
 
 AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_REGION_NAME}.amazonaws.com/{AWS_STORAGE_BUCKET_NAME}'
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'

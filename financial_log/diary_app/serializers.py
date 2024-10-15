@@ -13,7 +13,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 class DiarySerializer(serializers.ModelSerializer):
     hashtag = HashtagSerializer(many=True, read_only=True)
-    # image = ImageSerializer(many=True, read_only=True)
+    image = ImageSerializer(many=True, read_only=True)
     class Meta:
         model = Diary
-        fields = ('user', 'date', 'contents', 'privacy', 'hashtag')
+        fields = ('user', 'date', 'contents', 'privacy', 'hashtag', 'location')

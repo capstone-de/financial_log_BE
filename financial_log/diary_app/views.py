@@ -12,7 +12,6 @@ from .serializers import DiarySerializer, ImageSerializer
 from wallet_app.serializers import DiaryExpenseSerializer
 
 from django.conf import settings
-# import base64
 import boto3
 from uuid import uuid4
 from django.conf import settings
@@ -60,21 +59,12 @@ def diaryList(request):
             hashtagList = DiaryHashtag.objects.filter(diary = diary.diary_id)
             imageList = Image.objects.filter(diary = diary.diary_id)
             return_hashtag = []
-            # 이미지 URL을 그대로 반환
-            # return_images = []
+            
             return_images = [imageItem.image for imageItem in imageList]
             for hashtagItem in hashtagList:
                 hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
                 return_hashtag.append(hashtag)
-            # for imageItem in imageList:
-            #     image_path = '_media/' + imageItem.image.decode('utf-8')
-            #     try:
-            #         with open(image_path, 'rb') as image_file:
-            #             encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-            #             # Base64 인코딩된 이미지 데이터를 리스트에 추가
-            #             return_images.append(encoded_image)
-            #     except Exception as e:
-            #         print(f"Error encoding image: {e}")
+           
             diaryData = {
                 'nickname': User.objects.get(user_id = diary.user.user_id).nickname,
                 'date': diary.date,
@@ -101,20 +91,11 @@ def myDiaryList(request):
         imageList = Image.objects.filter(diary = myDiary.diary_id)
         return_hashtag = []
         # 이미지 URL을 그대로 반환
-        # return_images = []
         return_images = [imageItem.image for imageItem in imageList]
         for hashtagItem in hashtagList:
             hashtag = Hashtag.objects.get(hashtag = hashtagItem.hashtag.hashtag).hashtag
             return_hashtag.append(hashtag)
-        # for imageItem in imageList:
-        #         image_path = '_media/' + imageItem.image.decode('utf-8')
-        #         try:
-        #             with open(image_path, 'rb') as image_file:
-        #                 encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-        #                 # Base64 인코딩된 이미지 데이터를 리스트에 추가
-        #                 return_images.append(encoded_image)
-        #         except Exception as e:
-        #             print(f"Error encoding image: {e}")
+        
         diary_data = {
             'date': myDiary.date,
             'contents': myDiary.contents,
@@ -160,7 +141,6 @@ def saveDiary(request):
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
             diary.save()
             for imageListItem in imageList :
-                # image = Image(diary = diary, image = imageListItem)
                 image_url = upload_image_to_s3(imageListItem, data['user'])
                 image = Image(diary=diary, image=image_url)  # S3 URL을 저장
                 print(image)

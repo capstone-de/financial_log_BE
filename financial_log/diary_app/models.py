@@ -8,6 +8,7 @@ class Diary(models.Model):
     date = models.DateField()
     contents = models.CharField(max_length=500)
     privacy = models.BooleanField(db_comment='1 == public\n0 == private\n')
+    # location = models.CharField(max_length=5)
 
     class Meta:
         managed = False
