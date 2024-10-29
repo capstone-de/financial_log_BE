@@ -8,7 +8,7 @@ class Diary(models.Model):
     date = models.DateField()
     contents = models.CharField(max_length=500)
     privacy = models.BooleanField(db_comment='1 == public\n0 == private\n')
-    # location = models.CharField(max_length=5)
+    gu = models.ForeignKey(Gu)
 
     class Meta:
         managed = False
@@ -42,4 +42,12 @@ class DiaryHashtag(models.Model):
     class Meta:
         managed = False
         db_table = 'DiaryHashtag'
+
+class Gu(models.Model):
+    gu_id = models.IntegerField(primary_key=True)
+    gu = models.CharField(max_length=5)
+
+    class Meta:
+        managed = False
+        db_table = 'Gu'
     
