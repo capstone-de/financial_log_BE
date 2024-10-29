@@ -129,7 +129,6 @@ def saveDiary(request):
     if request.method == 'POST' : 
         diarySerializer = DiarySerializer(data = request.data)
         imageList = request.FILES.getlist('image')
-        input_gu = request.data.get('gu')
         print(request.data)
         print(imageList)
         if diarySerializer.is_valid() :
@@ -140,7 +139,7 @@ def saveDiary(request):
             else:
                 hashtagList = request.data.get('hashtag', [])  # 이미지가 없는 경우
             
-            gu = Gu.objects.get(input_gu=request.data.get('gu'))
+            gu = Gu.objects.get(gu=request.data.get('gu'))
             diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'], gu = gu)
             diary.save()
 
