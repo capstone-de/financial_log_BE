@@ -16,4 +16,4 @@ class DiarySerializer(serializers.ModelSerializer):
     image = ImageSerializer(many=True, read_only=True)
     class Meta:
         model = Diary
-        fields = ('user', 'date', 'contents', 'privacy', 'hashtag', 'gu')
+        fields = ('user', 'date', 'contents', 'privacy', 'hashtag')

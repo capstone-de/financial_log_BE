@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Diary, Image, Hashtag, DiaryHashtag
+from .models import Diary, Image, Hashtag, DiaryHashtag, Gu
 from wallet_app.models import Expense
 from user_app.models import User, Follow
 
@@ -129,6 +129,7 @@ def saveDiary(request):
     if request.method == 'POST' : 
         diarySerializer = DiarySerializer(data = request.data)
         imageList = request.FILES.getlist('image')
+        input_gu = request.data.get('gu')
         print(request.data)
         print(imageList)
         if diarySerializer.is_valid() :
@@ -138,19 +139,24 @@ def saveDiary(request):
                 hashtagList = request.data.getlist('hashtag')  # 이미지가 있는 경우
             else:
                 hashtagList = request.data.get('hashtag', [])  # 이미지가 없는 경우
-            diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'])
+            
+            gu = Gu.objects.get(input_gu=request.data.get('gu'))
+            diary = Diary(user=User.objects.get(user_id = data['user']), date=data['date'], contents=data['contents'], privacy=data['privacy'], gu = gu)
             diary.save()
+
             for imageListItem in imageList :
                 image_url = upload_image_to_s3(imageListItem, data['user'])
                 image = Image(diary=diary, image=image_url)  # S3 URL을 저장
                 print(image)
                 image.save()
+
             for hashtagListItem in hashtagList :
                 if not Hashtag.objects.filter(hashtag=hashtagListItem):
                     hashtag = Hashtag(hashtag = hashtagListItem)
                     hashtag.save()
                 diaryHashtag = DiaryHashtag(diary = diary, hashtag = Hashtag.objects.get(hashtag=hashtagListItem))
                 diaryHashtag.save()
+
             return JsonResponse({"message" : "success"}, status=200)
         else :
             return JsonResponse({"error": diarySerializer.errors}, status=403)

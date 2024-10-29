@@ -4,7 +4,7 @@ from .models import Diary, Image, Hashtag, DiaryHashtag, User
 # Register your models here.
 
 class DiaryAdmin(admin.ModelAdmin):
-    list_display = ['diary_id', 'user','date', 'contents', 'privacy']
+    list_display = ['diary_id', 'user','date', 'contents', 'privacy', 'gu']
     
     
 class HashtagAdmin(admin.ModelAdmin):
