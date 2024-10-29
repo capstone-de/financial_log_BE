@@ -155,6 +155,13 @@ def sentimentAnalysis(request):
     # 일기와 지출이 모두 있는 날짜만 선택
     common_dates = set(diary_dates).intersection(set(expense_dates))
 
+    if not common_dates : 
+        result = {
+            'coordinate': [],  # 빈 리스트
+            'correlation': None  # 또는 0으로 설정할 수도 있음
+        }
+        return Response(result)
+
     # 공통 날짜에 해당하는 일기와 지출 데이터 가져오기
     diaries = Diary.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'contents')
     expenses = Expense.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'price')
