@@ -8,5 +8,6 @@ urlpatterns = [
     path('weekly', views.weekly),
     path('monthly', views.monthly),
     path('yearly', views.yearly),
-    path('sentimentAnalysis', views.yearly),
+    path('sentimentAnalysis', views.sentimentAnalysis),
+    path('locationAnalysis', views.locationtAnalysis),
 ]
