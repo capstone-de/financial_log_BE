@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from user_app.models import User
 from wallet_app.models import Income, Expense
-from diary_app.models import Diary, Hashtag, DiaryHashtag
+from diary_app.models import Diary, Hashtag, DiaryHashtag, Gu
 
 from django.db.models import Sum, Avg
 from datetime import datetime, timedelta
@@ -112,20 +112,6 @@ def yearly(request):
     }
     return Response(yearly)
 
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
-from user_app.models import User
-from wallet_app.models import Income, Expense
-from diary_app.models import Diary, Hashtag, DiaryHashtag
-
-from django.db.models import Sum, Avg
-from datetime import datetime, timedelta
-
-from transformers import pipeline
-from scipy.stats import pearsonr
 
 # 감성 분석 모델 로드
 sentiment_pipeline = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
@@ -157,8 +143,8 @@ def sentimentAnalysis(request):
 
     if not common_dates : 
         result = {
-            'coordinate': [],  # 빈 리스트
-            'correlation': None  # 또는 0으로 설정할 수도 있음
+            'coordinate': [],  
+            'correlation': 0  
         }
         return Response(result)
 
@@ -176,9 +162,9 @@ def sentimentAnalysis(request):
         if sentiment_result:
             score = 0  # 기본 점수는 0으로 설정
             if sentiment_result['label'] == 'POSITIVE':
-                score = round(sentiment_result['score'],2) # 긍정 점수를 그대로 사용
+                score = round(sentiment_result['score'] - 3, 2) # 긍정 점수를 그대로 사용
             elif sentiment_result['label'] == 'NEGATIVE':
-                score = round(-sentiment_result['score'],2)  # 부정 점수는 음수로 변환하여 사용
+                score = round(-sentiment_result['score'], 2)  # 부정 점수는 음수로 변환하여 사용
             
             # 해당 일기의 날짜에 맞는 지출 금액 찾기
             expenditure = next((expense['price'] for expense in expenses if expense['date'] == diary['date']), 0)
@@ -191,13 +177,51 @@ def sentimentAnalysis(request):
     print("expenditure_values" + str(expenditure_values))
 
     # 피어슨 상관계수 계산
-    correlation = None
-    if len(sentiment_results) > 1 and len(expenditure_values) > 1:
+    correlation = 0
+    if len(sentiment_results) >= 1 and len(expenditure_values) >= 1:
         correlation, _ = pearsonr(sentiment_results, expenditure_values)
 
     result = {
         'coordinate': coordinates,  # (감정분석수행 결과, 금액) 리스트
         'correlation': round(correlation,2)
     }
+
+    return Response(result)
+
+@api_view(['GET'])
+def locationAnalysis(request):
+    user = request.GET.get('user')
+    year = request.GET.get('year')
+    month = request.GET.get('month')
+
+    # 일기와 지출 데이터를 모두 갖고 있는 날짜 필터링
+    diary_dates = Diary.objects.filter(user=User.objects.get(user_id=user), date__year=year, date__month=month).values_list('date', flat=True)
+    expense_dates = Expense.objects.filter(user=User.objects.get(user_id=user), date__year=year, date__month=month).values_list('date', flat=True)
+
+    # 일기와 지출이 모두 있는 날짜만 선택
+    common_dates = set(diary_dates).intersection(set(expense_dates))
+
+    if not common_dates :
+        result = {
+            'gu': "",
+            'total_expenditure' : 0
+        }
+        return Response(result)
+
+    # 일기와 지출 데이터를 미리 가져오기
+    diaries = Diary.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'gu')
+    expenses_dict = {expense['date']: expense['price'] for expense in Expense.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'price')}
+
+    result = []
+
+    # 구 정보를 미리 가져와서 저장
+    gu_names = {gu_obj.gu_id: gu_obj.gu for gu_obj in Gu.objects.all()}
+
+    for gu in range(1, 26):
+        total_expenditure = 0
+        for diary in diaries:
+            if diary['gu'] == gu:
+                total_expenditure += expenses_dict.get(diary['date'], 0)
+        result.append({'gu': gu_names.get(gu, ''), 'total_expenditure': total_expenditure})
 
     return Response(result)
