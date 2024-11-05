@@ -81,6 +81,7 @@ def diary(request):
     wordcloud = WordCloud(width=300, height=300, 
                       background_color='white', 
                       color_func=color_func2,
+                      font_path=str(font_path), 
                       min_font_size=10).generate_from_frequencies(word_count)
 
     image_path = "./wordcloud_app/media/diary.png"
