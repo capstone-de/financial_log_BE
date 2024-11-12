@@ -79,7 +79,7 @@ def saveExpenseOCR(request) :
     date = request.GET.get('date')
     image = request.FILES.get('image')
 
-    files = [('file', open(image, 'rb'))]
+    files = [('file', image)]
 
     request_json = {'images' : [{'format' : 'jpeg', 'name' : 'demo'}],
                 'requestId' : str(uuid.uuid4()),
