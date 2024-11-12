@@ -7,6 +7,8 @@ from .models import Income, Expense, WithWhom
 from user_app.models import User, Follow
 from .serializers import IncomeSerializer, ExpenseSerializer, WithWhomSerializer
 
+from django.conf import settings
+
 @csrf_exempt
 @api_view(['POST'])
 def saveIncome(request) :
@@ -43,3 +45,75 @@ def saveExpense(request) :
             return JsonResponse({"message" : "success"}, status=200)
         else :
             return JsonResponse({"error" : serializers.errors}, status=403)
+
+
+from django.conf import settings
+
+def reverse_lines(text):
+    lines = text.splitlines()
+    reversed_lines = lines[::-1]
+    reversed_text = '\n'.join(reversed_lines)
+    return reversed_text
+
+# 총 지불 금액 추출 함수
+def extract_total_amount(text):
+    reversed_text = reverse_lines(text)
+    # '합계' 뒤에 나오는 금액을 우선적으로 찾고 없으면 다른 금액을 탐색
+    total_amount_pattern = re.search(r'(합\s?계)\s*[:\s]?\s*([\d,]+)\s*원?', reversed_text)
+    if total_amount_pattern:
+        total_amount = total_amount_pattern.group(2)
+        return total_amount.replace(",", "") 
+    # '합계'가 없으면 다른 금액 관련 키워드로 검색
+    amount_pattern = re.search(r'(판매총액|받을금액|금\s?액|총액|신용액|결제금액|신용카드|받은돈|total|Total)\s*[:\s]?\s*([\d,]+)\s*원?', reversed_text)
+    # 금액 추출
+    if amount_pattern:
+        amount = amount_pattern.group(2)
+        return amount.replace(",", "")  
+    else:
+        return "총 지불 금액을 찾을 수 없습니다."
+
+@csrf_exempt
+@api_view(['POST'])
+def saveExpenseOCR(request) :
+    user = request.GET.get('user')
+    date = request.GET.get('date')
+    image = request.FILES.get('image')
+
+    files = [('file', open(image, 'rb'))]
+
+    request_json = {'images' : [{'format' : 'jpeg', 'name' : 'demo'}],
+                'requestId' : str(uuid.uuid4()),
+                'version' : 'V2',
+                'timestamp' : int(round(time.time() * 1000))
+                }
+    payload = {'message' : json.dumps(request_json).encode('UTF-8')}
+    headers = {'X-OCR-SECRET' : settings.SECRET_KEY}
+
+    response = requests.request("POST", settings.APIGY_URL, headers = headers, data = payload, files = files)
+    result = response.json()
+
+    string_result = ''
+    for i in result['images'][0]['fields']:
+        if i['lineBreak'] == True:
+            linebreak = '\n'
+        else:
+            linebreak = ' '
+        string_result = string_result + i['inferText'] + linebreak
+
+    print(string_result)
+
+    amount = extract_total_amount(string_result)
+    print("금액:", amount)
+
+    if amount == "총 지불 금액을 찾을 수 없습니다.":
+        return JsonResponse({"message" : "fail"}, status = 403)
+    else : 
+        response = {
+            'amount': amount
+            }
+        return Response(response)
+
+
+
+
+

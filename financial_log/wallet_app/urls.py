@@ -6,4 +6,5 @@ app_name = 'wallet_app'
 urlpatterns = [
     path('saveIncome', views.saveIncome),
     path('saveExpense', views.saveExpense),
+    path('saveExpenseOCR', views.saveExpenseOCR),
 ]
