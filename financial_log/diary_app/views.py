@@ -70,7 +70,8 @@ def diaryList(request):
                 'date': diary.date,
                 'contents': diary.contents,
                 'hashtag': return_hashtag,
-                'image' : return_images
+                'image' : return_images,
+                'gu': Gu.objects.get(gu_id = diary.gu_id).gu
             }
             diaryListResult.append(diaryData)
         return Response(diaryListResult)
@@ -100,7 +101,8 @@ def myDiaryList(request):
             'date': myDiary.date,
             'contents': myDiary.contents,
             'hashtag': return_hashtag,
-            'image' : return_images
+            'image' : return_images,
+            'gu': Gu.objects.get(gu_id = diary.gu_id).gu
         }
         myDiaryListResult.append(diary_data)
 
