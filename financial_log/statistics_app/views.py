@@ -116,14 +116,19 @@ def yearly(request):
 # 감성 분석 모델 로드
 sentiment_pipeline = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 
-# 감성 분석 함수
 def analyze_sentiment(text):
     try:
         result = sentiment_pipeline(text[:500])
-        if result[0]['label'] in ['5 stars', '4 stars', '3 stars']:
+        if result[0]['label'] == '5 stars':
+            return {'label': 'POSITIVE', 'score': 2 + result[0]['score']}
+        elif result[0]['label'] == '4 stars':
+            return {'label': 'POSITIVE', 'score': 1 + result[0]['score']}
+        elif result[0]['label'] == '3 stars':
             return {'label': 'POSITIVE', 'score': result[0]['score']}
-        else:
-            return {'label': 'NEGATIVE', 'score': result[0]['score']}
+        elif result[0]['label'] == '2 stars':
+            return {'label': 'Negative', 'score': -1 - result[0]['score']}
+        elif result[0]['label'] == '1 stars':
+            return {'label': 'NEGATIVE', 'score': -2 - result[0]['score']}
     except Exception as e:
         print(f"감성 분석 중 오류 발생: {e}")
         return None
@@ -160,15 +165,11 @@ def sentimentAnalysis(request):
     for diary in diaries:
         sentiment_result = analyze_sentiment(diary['contents'])
         if sentiment_result:
-            score = 0  # 기본 점수는 0으로 설정
-            if sentiment_result['label'] == 'POSITIVE':
-                score = round(sentiment_result['score'] - 3, 2) # 긍정 점수를 그대로 사용
-            elif sentiment_result['label'] == 'NEGATIVE':
-                score = round(-sentiment_result['score'], 2)  # 부정 점수는 음수로 변환하여 사용
+            score = round(sentiment_result['score'] - 3, 2) # 긍정 점수를 그대로 사용
             
             # 해당 일기의 날짜에 맞는 지출 금액 찾기
             expenditure = next((expense['price'] for expense in expenses if expense['date'] == diary['date']), 0)
-            
+
             sentiment_results.append(score)
             expenditure_values.append(expenditure)
             coordinates.append((score, expenditure))  # (감정 점수, 지출 금액) 형태로 저장
