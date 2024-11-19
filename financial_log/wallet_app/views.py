@@ -59,7 +59,7 @@ def reverse_lines(text):
 def extract_total_amount(text):
     reversed_text = reverse_lines(text)
     # '합계' 뒤에 나오는 금액을 우선적으로 찾고 없으면 다른 금액을 탐색
-    total_amount_pattern = re.search(r'(합\s?계)\s*[:\s]?\s*([\d,]+)\s*원?', reversed_text)
+    total_amount_pattern = re.search(r'(합\s?계|총합계|[Tt]otal)\s*[:\s]?\s*([\d,]+)\s*원?', reversed_text)
     if total_amount_pattern:
         total_amount = total_amount_pattern.group(2)
         return total_amount.replace(",", "") 
