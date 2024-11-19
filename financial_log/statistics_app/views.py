@@ -116,19 +116,20 @@ def yearly(request):
 # 감성 분석 모델 로드
 sentiment_pipeline = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 
+# 감성 분석 함수
 def analyze_sentiment(text):
     try:
         result = sentiment_pipeline(text[:500])
         if result[0]['label'] == '5 stars':
-            return {'label': 'POSITIVE', 'score': 2 + result[0]['score']}
+            return {'label': 'POSITIVE', 'score': 4 + result[0]['score']}
         elif result[0]['label'] == '4 stars':
-            return {'label': 'POSITIVE', 'score': 1 + result[0]['score']}
+            return {'label': 'POSITIVE', 'score': 3 + result[0]['score']}
         elif result[0]['label'] == '3 stars':
-            return {'label': 'POSITIVE', 'score': result[0]['score']}
+            return {'label': 'POSITIVE', 'score': 2 + result[0]['score']}
         elif result[0]['label'] == '2 stars':
-            return {'label': 'Negative', 'score': -1 - result[0]['score']}
+            return {'label': 'Negative', 'score': 1 + result[0]['score']}
         elif result[0]['label'] == '1 stars':
-            return {'label': 'NEGATIVE', 'score': -2 - result[0]['score']}
+            return {'label': 'NEGATIVE', 'score': result[0]['score']}
     except Exception as e:
         print(f"감성 분석 중 오류 발생: {e}")
         return None
@@ -139,55 +140,58 @@ def sentimentAnalysis(request):
     year = request.GET.get('year')
     month = request.GET.get('month')
 
-    # 일기와 지출 데이터를 모두 갖고 있는 날짜 필터링
-    diary_dates = Diary.objects.filter(user=User.objects.get(user_id=user), date__year=year, date__month=month).values_list('date', flat=True)
-    expense_dates = Expense.objects.filter(user=User.objects.get(user_id=user), date__year=year, date__month=month).values_list('date', flat=True)
+    try:
+        # User 객체 미리 가져오기
+        user_obj = User.objects.get(user_id=user)
 
-    # 일기와 지출이 모두 있는 날짜만 선택
-    common_dates = set(diary_dates).intersection(set(expense_dates))
+        # 공통 날짜 가져오기
+        common_dates = Diary.objects.filter(
+            user=user_obj, date__year=year, date__month=month
+        ).filter(
+            date__in=Expense.objects.filter(user=user_obj, date__year=year, date__month=month).values_list('date', flat=True)
+        ).values_list('date', flat=True)
 
-    if not common_dates : 
-        result = {
-            'coordinate': [],  
-            'correlation': 0  
-        }
-        return Response(result)
+        if not common_dates:
+            return Response({'coordinate': [], 'correlation': 0})
 
-    # 공통 날짜에 해당하는 일기와 지출 데이터 가져오기
-    diaries = Diary.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'contents')
-    expenses = Expense.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates)
+        # 공통 날짜의 일기와 지출 데이터 가져오기
+        diaries = Diary.objects.filter(user=user_obj, date__in=common_dates).values('date', 'contents')
+        expenses = (
+            Expense.objects.filter(user=user_obj, date__in=common_dates)
+            .values('date')
+            .annotate(total_price=Sum('price'))  # 날짜별 합계
+        )
+        expense_dict = {expense['date']: expense['total_price'] for expense in expenses}
 
-    sentiment_results = []
-    expenditure_values = []
-    coordinates = []
+        sentiment_results = []
+        expenditure_values = []
+        coordinates = []
 
-    # 각 일기의 내용에 대해 감성 분석 수행 및 결과 저장
-    for diary in diaries:
-        sentiment_result = analyze_sentiment(diary['contents'])
-        if sentiment_result:
-            score = round(sentiment_result['score'], 2)
-            
-            # 해당 일기의 날짜에 맞는 지출 금액 찾기
-            expenditure = expenses.filter(date=diary['date']).aggregate(total=Sum('price'))['total'] or 0
+        # 감성 분석 및 데이터 매핑
+        for diary in diaries:
+            sentiment_result = analyze_sentiment(diary['contents'])
+            if sentiment_result:
+                score = round(sentiment_result['score'], 2)
+                expenditure = expense_dict.get(diary['date'], 0)
+                sentiment_results.append(score)
+                expenditure_values.append(expenditure)
+                coordinates.append((score, expenditure))
 
-            sentiment_results.append(score)
-            expenditure_values.append(expenditure)
-            coordinates.append((score, expenditure))  # (감정 점수, 지출 금액) 형태로 저장
+        # 상관계수 계산
+        correlation = 0
+        if len(sentiment_results) > 1 and len(expenditure_values) > 1:
+            correlation, _ = pearsonr(sentiment_results, expenditure_values)
 
-    print("sentiment_results" + str(sentiment_results))
-    print("expenditure_values" + str(expenditure_values))
+        return Response({
+            'count' : len(coordinates),
+            'coordinate': coordinates,
+            'correlation': round(correlation, 2)
+        })
 
-    # 피어슨 상관계수 계산
-    correlation = 0
-    if len(sentiment_results) >= 1 and len(expenditure_values) >= 1:
-        correlation, _ = pearsonr(sentiment_results, expenditure_values)
+    except Exception as e:
+        print(f"에러 발생: {e}")
+        return Response({'error': 'Internal Server Error'}, status=500)
 
-    result = {
-        'coordinate': coordinates,  # (감정분석수행 결과, 금액) 리스트
-        'correlation': round(correlation,2)
-    }
-
-    return Response(result)
 
 @api_view(['GET'])
 def locationAnalysis(request):
