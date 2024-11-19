@@ -152,7 +152,7 @@ def sentimentAnalysis(request):
         ).values_list('date', flat=True)
 
         if not common_dates:
-            return Response({'coordinate': [], 'correlation': 0})
+            return Response({'count': 0, 'coordinate': [], 'correlation': 0})
 
         # 공통 날짜의 일기와 지출 데이터 가져오기
         diaries = Diary.objects.filter(user=user_obj, date__in=common_dates).values('date', 'contents')
