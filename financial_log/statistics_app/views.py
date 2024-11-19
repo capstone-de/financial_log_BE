@@ -155,7 +155,7 @@ def sentimentAnalysis(request):
 
     # 공통 날짜에 해당하는 일기와 지출 데이터 가져오기
     diaries = Diary.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'contents')
-    expenses = Expense.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates).values('date', 'price')
+    expenses = Expense.objects.filter(user=User.objects.get(user_id=user), date__in=common_dates)
 
     sentiment_results = []
     expenditure_values = []
@@ -165,10 +165,10 @@ def sentimentAnalysis(request):
     for diary in diaries:
         sentiment_result = analyze_sentiment(diary['contents'])
         if sentiment_result:
-            score = round(sentiment_result['score'] - 3, 2) # 긍정 점수를 그대로 사용
+            score = round(sentiment_result['score'], 2)
             
             # 해당 일기의 날짜에 맞는 지출 금액 찾기
-            expenditure = next((expense['price'] for expense in expenses if expense['date'] == diary['date']), 0)
+            expenditure = expenses.filter(date=diary['date']).aggregate(total=Sum('price'))['total'] or 0
 
             sentiment_results.append(score)
             expenditure_values.append(expenditure)
